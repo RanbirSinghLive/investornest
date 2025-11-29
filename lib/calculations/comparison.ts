@@ -8,11 +8,33 @@ import { calculateMortgageAmortization } from './mortgage'
 import { calculateInvestmentBreakdown } from './investment'
 import { calculateMortgageFreeDate } from './mortgage'
 import { calculateNetReturn } from './tax'
+import { getInflationAdjustmentFactor } from '../utils/inflation'
+
+/**
+ * Calculate home value with appreciation over time
+ * @param initialHomeValue Starting home value (typically = loan balance)
+ * @param appreciationRate Annual appreciation rate as percentage
+ * @param months Number of months from present
+ * @returns Home value after appreciation
+ */
+function calculateHomeValueWithAppreciation(
+  initialHomeValue: number,
+  appreciationRate: number,
+  months: number
+): number {
+  if (appreciationRate === 0) {
+    return initialHomeValue
+  }
+  // Compound appreciation: homeValue = initialValue * (1 + rate)^(months/12)
+  const annualFactor = 1 + appreciationRate / 100
+  const years = months / 12
+  return initialHomeValue * Math.pow(annualFactor, years)
+}
 
 /**
  * Calculate net worth for a strategy
- * Net Worth = Home Equity + Investment Balance - Remaining Mortgage Balance
- * For simplicity, we assume home value = initial loan amount (no appreciation)
+ * Net Worth = Home Equity + Investment Balance
+ * Home Equity = Home Value (with appreciation) - Remaining Mortgage Balance
  */
 function calculateNetWorth(
   homeValue: number,
@@ -21,6 +43,30 @@ function calculateNetWorth(
 ): number {
   const homeEquity = homeValue - mortgageBalance
   return homeEquity + investmentBalance
+}
+
+/**
+ * Apply inflation adjustment to monthly data if real terms are requested
+ */
+function applyInflationAdjustment(
+  monthlyData: MonthlyData[],
+  inputs: CalculatorInputs
+): MonthlyData[] {
+  if (!inputs.showRealTerms || inputs.inflationRate === 0) {
+    return monthlyData
+  }
+
+  return monthlyData.map((data) => {
+    const adjustmentFactor = getInflationAdjustmentFactor(inputs.inflationRate, data.month)
+    return {
+      ...data,
+      mortgageBalance: data.mortgageBalance * adjustmentFactor,
+      investmentBalance: data.investmentBalance * adjustmentFactor,
+      netWorth: data.netWorth * adjustmentFactor,
+      totalPaid: data.totalPaid * adjustmentFactor,
+      interestPaid: data.interestPaid * adjustmentFactor,
+    }
+  })
 }
 
 /**
@@ -57,7 +103,12 @@ function calculatePrepayStrategy(
       interestPaid: mortgageBreakdown[mortgageBreakdown.length - 1]?.interestPaid || 0,
     }
     const investment = investmentBreakdown[i] || 0
-    const homeValue = inputs.loanBalance // Assume home value = initial loan
+    // Calculate home value with appreciation
+    const homeValue = calculateHomeValueWithAppreciation(
+      inputs.loanBalance,
+      inputs.homeAppreciationRate,
+      mortgage.month
+    )
     const netWorth = calculateNetWorth(homeValue, mortgage.mortgageBalance, investment)
 
     monthlyData.push({
@@ -67,7 +118,9 @@ function calculatePrepayStrategy(
     })
   }
 
-  const finalData = monthlyData[monthlyData.length - 1] || monthlyData[0]
+  // Apply inflation adjustment if requested
+  const adjustedMonthlyData = applyInflationAdjustment(monthlyData, inputs)
+  const finalData = adjustedMonthlyData[adjustedMonthlyData.length - 1] || adjustedMonthlyData[0]
   const mortgageFreeDate = calculateMortgageFreeDate(
     inputs.loanBalance,
     inputs.interestRate,
@@ -82,7 +135,7 @@ function calculatePrepayStrategy(
     investmentBalance: finalData.investmentBalance,
     mortgageFreeDate,
     totalInterestPaid: finalData.interestPaid,
-    monthlyBreakdown: monthlyData,
+    monthlyBreakdown: adjustedMonthlyData,
     totalPaid: finalData.totalPaid,
   }
 }
@@ -135,7 +188,12 @@ function calculateInvestStrategy(
       interestPaid: mortgageBreakdown[mortgageBreakdown.length - 1]?.interestPaid || 0,
     }
     const investment = investmentBreakdown[i] || 0
-    const homeValue = inputs.loanBalance // Assume home value = initial loan
+    // Calculate home value with appreciation
+    const homeValue = calculateHomeValueWithAppreciation(
+      inputs.loanBalance,
+      inputs.homeAppreciationRate,
+      mortgage.month
+    )
     const netWorth = calculateNetWorth(homeValue, mortgage.mortgageBalance, investment)
 
     monthlyData.push({
@@ -145,7 +203,9 @@ function calculateInvestStrategy(
     })
   }
 
-  const finalData = monthlyData[monthlyData.length - 1] || monthlyData[0]
+  // Apply inflation adjustment if requested
+  const adjustedMonthlyData = applyInflationAdjustment(monthlyData, inputs)
+  const finalData = adjustedMonthlyData[adjustedMonthlyData.length - 1] || adjustedMonthlyData[0]
   const mortgageFreeDate = calculateMortgageFreeDate(
     inputs.loanBalance,
     inputs.interestRate,
@@ -160,7 +220,7 @@ function calculateInvestStrategy(
     investmentBalance: finalData.investmentBalance,
     mortgageFreeDate,
     totalInterestPaid: finalData.interestPaid,
-    monthlyBreakdown: monthlyData,
+    monthlyBreakdown: adjustedMonthlyData,
     totalPaid: finalData.totalPaid,
   }
 }
@@ -263,6 +323,9 @@ export function calculateComparison(inputs: CalculatorInputs): CalculationResult
   console.log(`💰 Extra payment: ${inputs.extraPayment} CAD (${inputs.extraPaymentFrequency})`)
   console.log(
     `💼 Investment: ${inputs.investmentAccountType}, Province: ${inputs.province}, Income: ${inputs.grossIncome.toLocaleString('en-CA')} CAD`
+  )
+  console.log(
+    `🏠 Home appreciation: ${inputs.homeAppreciationRate}% annually${inputs.homeAppreciationRate > 0 ? ' (affects home equity growth)' : ' (no appreciation)'}`
   )
   console.log(`📅 Using mortgage remaining timeline: ${totalMonthsRemaining} months`)
 

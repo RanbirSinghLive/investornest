@@ -327,6 +327,76 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
               </span>
             </p>
           </div>
+
+          <div>
+            <Slider
+              label="Expected Home Appreciation"
+              value={inputs.homeAppreciationRate}
+              min={0}
+              max={10}
+              step={0.1}
+              formatValue={(v) => formatPercentage(v, 1)}
+              onChange={(e) => handleChange('homeAppreciationRate', Number(e.target.value))}
+            />
+            <Input
+              type="number"
+              label="Expected Home Appreciation (%)"
+              value={inputs.homeAppreciationRate}
+              min={0}
+              max={10}
+              step={0.1}
+              onChange={(e) => handleChange('homeAppreciationRate', Number(e.target.value))}
+              className="mt-2"
+              helperText="Annual home value appreciation rate. Shows how home equity growth affects net worth."
+            />
+          </div>
+
+          <div className="border-t pt-4 mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Show Results in Real Terms (Inflation-Adjusted)
+                </label>
+                <p className="text-xs text-gray-500">
+                  Convert all values to today's purchasing power
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={inputs.showRealTerms}
+                  onChange={(e) => handleChange('showRealTerms', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+              </label>
+            </div>
+
+            {inputs.showRealTerms && (
+              <div className="mt-4">
+                <Slider
+                  label="Annual Inflation Rate"
+                  value={inputs.inflationRate}
+                  min={0}
+                  max={5}
+                  step={0.1}
+                  formatValue={(v) => formatPercentage(v, 1)}
+                  onChange={(e) => handleChange('inflationRate', Number(e.target.value))}
+                />
+                <Input
+                  type="number"
+                  label="Annual Inflation Rate (%)"
+                  value={inputs.inflationRate}
+                  min={0}
+                  max={5}
+                  step={0.1}
+                  onChange={(e) => handleChange('inflationRate', Number(e.target.value))}
+                  className="mt-2"
+                  helperText="Default: 2%. Adjust to reflect your inflation expectations."
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Card>

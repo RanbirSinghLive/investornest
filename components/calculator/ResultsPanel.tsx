@@ -8,9 +8,10 @@ import type { CalculationResults } from '@/lib/types'
 
 interface ResultsPanelProps {
   results: CalculationResults | null
+  showRealTerms: boolean
 }
 
-export function ResultsPanel({ results }: ResultsPanelProps) {
+export function ResultsPanel({ results, showRealTerms }: ResultsPanelProps) {
   if (!results) {
     return (
       <div className="bg-white rounded-lg shadow-md p-12 text-center">
@@ -23,8 +24,13 @@ export function ResultsPanel({ results }: ResultsPanelProps) {
 
   return (
     <div className="space-y-6">
-      <SummaryCards results={results} />
-      <Chart results={results} />
+      {showRealTerms && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+          <strong>ℹ️ Real Terms:</strong> All values shown are inflation-adjusted to today's purchasing power.
+        </div>
+      )}
+      <SummaryCards results={results} showRealTerms={showRealTerms} />
+      <Chart results={results} showRealTerms={showRealTerms} />
       <NarrativeOutput results={results} />
     </div>
   )

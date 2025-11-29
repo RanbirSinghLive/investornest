@@ -32,6 +32,9 @@ export interface CalculatorInputs {
   investmentAccountType: InvestmentAccountType // Account type for tax calculation
   province: CanadianProvince // Province for provincial tax rate
   grossIncome: number // Gross annual income (CAD) for tax bracket calculation
+  showRealTerms: boolean // Toggle to show inflation-adjusted (real) terms
+  inflationRate: number // Annual inflation rate (%)
+  homeAppreciationRate: number // Expected annual home appreciation rate (%)
 }
 
 export interface MonthlyData {

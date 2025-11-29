@@ -19,6 +19,9 @@ const DEFAULT_INPUTS: CalculatorInputs = {
   investmentAccountType: 'TFSA',
   province: 'ON',
   grossIncome: 100000,
+  showRealTerms: false,
+  inflationRate: 2,
+  homeAppreciationRate: 0,
 }
 
 export default function Home() {
@@ -49,13 +52,12 @@ export default function Home() {
       savePreferences({
         interestRate: inputs.interestRate,
         expectedReturn: inputs.expectedReturn,
-        comparisonHorizon: inputs.comparisonHorizon,
       })
       console.log('✅ Preferences saved')
     }, 1000)
 
     return () => clearTimeout(timer)
-  }, [inputs.interestRate, inputs.expectedReturn, inputs.comparisonHorizon])
+  }, [inputs.interestRate, inputs.expectedReturn])
 
   // Calculate results with memoization
   const results = useMemo(() => {
@@ -100,7 +102,7 @@ export default function Home() {
                 <p className="text-gray-500">Calculating...</p>
               </div>
             ) : (
-              <ResultsPanel results={results} />
+              <ResultsPanel results={results} showRealTerms={inputs.showRealTerms} />
             )}
           </div>
         </div>

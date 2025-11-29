@@ -86,14 +86,27 @@ export function validateExpectedReturn(value: number): ValidationResult {
 }
 
 /**
- * Validate comparison horizon
+ * Validate inflation rate
  */
-export function validateComparisonHorizon(value: number): ValidationResult {
-  if (value <= 0) {
-    return { isValid: false, error: 'Comparison horizon must be greater than 0' }
+export function validateInflationRate(value: number): ValidationResult {
+  if (value < 0) {
+    return { isValid: false, error: 'Inflation rate cannot be negative' }
   }
-  if (value > 50) {
-    return { isValid: false, error: 'Comparison horizon cannot exceed 50 years' }
+  if (value > 10) {
+    return { isValid: false, error: 'Inflation rate cannot exceed 10%' }
+  }
+  return { isValid: true }
+}
+
+/**
+ * Validate home appreciation rate
+ */
+export function validateHomeAppreciationRate(value: number): ValidationResult {
+  if (value < 0) {
+    return { isValid: false, error: 'Home appreciation rate cannot be negative' }
+  }
+  if (value > 20) {
+    return { isValid: false, error: 'Home appreciation rate cannot exceed 20%' }
   }
   return { isValid: true }
 }
@@ -109,7 +122,9 @@ export function validateInputs(inputs: {
   regularPayment: number
   extraPayment: number
   expectedReturn: number
-  comparisonHorizon: number
+  grossIncome: number
+  inflationRate: number
+  homeAppreciationRate: number
 }): ValidationResult {
   const validations = [
     validateLoanBalance(inputs.loanBalance),
@@ -119,7 +134,9 @@ export function validateInputs(inputs: {
     validatePayment(inputs.regularPayment),
     validatePayment(inputs.extraPayment),
     validateExpectedReturn(inputs.expectedReturn),
-    validateComparisonHorizon(inputs.comparisonHorizon),
+    validateGrossIncome(inputs.grossIncome),
+    validateInflationRate(inputs.inflationRate),
+    validateHomeAppreciationRate(inputs.homeAppreciationRate),
   ]
 
   for (const validation of validations) {

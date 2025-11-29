@@ -7,9 +7,10 @@ import type { CalculationResults } from '@/lib/types'
 
 interface SummaryCardsProps {
   results: CalculationResults
+  showRealTerms: boolean
 }
 
-export function SummaryCards({ results }: SummaryCardsProps) {
+export function SummaryCards({ results, showRealTerms }: SummaryCardsProps) {
   const { prepayStrategy, investStrategy, comparison } = results
 
   const winnerText = {

@@ -17,9 +17,10 @@ import type { CalculationResults } from '@/lib/types'
 
 interface ChartProps {
   results: CalculationResults
+  showRealTerms: boolean
 }
 
-export function Chart({ results }: ChartProps) {
+export function Chart({ results, showRealTerms }: ChartProps) {
   const { prepayStrategy, investStrategy } = results
 
   // Prepare data for chart - sample every 12 months (yearly)
@@ -57,7 +58,9 @@ export function Chart({ results }: ChartProps) {
 
   return (
     <Card>
-      <h3 className="text-xl font-semibold text-gray-900 mb-4">Net Worth Over Time</h3>
+      <h3 className="text-xl font-semibold text-gray-900 mb-4">
+        Net Worth Over Time{showRealTerms && ' (Inflation-Adjusted)'}
+      </h3>
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -66,7 +69,11 @@ export function Chart({ results }: ChartProps) {
             label={{ value: 'Years', position: 'insideBottom', offset: -5 }}
           />
           <YAxis
-            label={{ value: 'Net Worth (CAD)', angle: -90, position: 'insideLeft' }}
+            label={{
+              value: showRealTerms ? 'Net Worth (CAD, Real Terms)' : 'Net Worth (CAD)',
+              angle: -90,
+              position: 'insideLeft',
+            }}
             tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip content={<CustomTooltip />} />
