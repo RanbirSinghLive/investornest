@@ -99,6 +99,19 @@ export function validateInflationRate(value: number): ValidationResult {
 }
 
 /**
+ * Validate current home value
+ */
+export function validateCurrentHomeValue(value: number): ValidationResult {
+  if (value <= 0) {
+    return { isValid: false, error: 'Current home value must be greater than 0' }
+  }
+  if (value > 10000000) {
+    return { isValid: false, error: 'Current home value is too large' }
+  }
+  return { isValid: true }
+}
+
+/**
  * Validate home appreciation rate
  */
 export function validateHomeAppreciationRate(value: number): ValidationResult {
@@ -116,25 +129,25 @@ export function validateHomeAppreciationRate(value: number): ValidationResult {
  */
 export function validateInputs(inputs: {
   loanBalance: number
+  currentHomeValue: number
   interestRate: number
   yearsRemaining: number
   monthsRemaining: number
   regularPayment: number
   extraPayment: number
   expectedReturn: number
-  grossIncome: number
   inflationRate: number
   homeAppreciationRate: number
 }): ValidationResult {
   const validations = [
     validateLoanBalance(inputs.loanBalance),
+    validateCurrentHomeValue(inputs.currentHomeValue),
     validateInterestRate(inputs.interestRate),
     validateYearsRemaining(inputs.yearsRemaining),
     validateMonthsRemaining(inputs.monthsRemaining),
     validatePayment(inputs.regularPayment),
     validatePayment(inputs.extraPayment),
     validateExpectedReturn(inputs.expectedReturn),
-    validateGrossIncome(inputs.grossIncome),
     validateInflationRate(inputs.inflationRate),
     validateHomeAppreciationRate(inputs.homeAppreciationRate),
   ]

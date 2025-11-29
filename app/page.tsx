@@ -9,6 +9,7 @@ import { loadPreferences, savePreferences } from '@/lib/utils/storage'
 
 const DEFAULT_INPUTS: CalculatorInputs = {
   loanBalance: 400000,
+  currentHomeValue: 500000,
   interestRate: 5.5,
   yearsRemaining: 25,
   monthsRemaining: 0,
@@ -16,9 +17,6 @@ const DEFAULT_INPUTS: CalculatorInputs = {
   extraPayment: 500,
   extraPaymentFrequency: 'monthly',
   expectedReturn: 7,
-  investmentAccountType: 'TFSA',
-  province: 'ON',
-  grossIncome: 100000,
   showRealTerms: false,
   inflationRate: 2,
   homeAppreciationRate: 0,
@@ -32,13 +30,12 @@ export default function Home() {
   useEffect(() => {
     console.log('🔍 Loading saved preferences...')
     const preferences = loadPreferences()
-    if (preferences.interestRate || preferences.expectedReturn || preferences.comparisonHorizon) {
+    if (preferences.interestRate || preferences.expectedReturn) {
       console.log('✅ Loaded preferences:', preferences)
       setInputs((prev) => ({
         ...prev,
         interestRate: preferences.interestRate ?? prev.interestRate,
         expectedReturn: preferences.expectedReturn ?? prev.expectedReturn,
-        comparisonHorizon: preferences.comparisonHorizon ?? prev.comparisonHorizon,
       }))
     } else {
       console.log('ℹ️ No saved preferences found, using defaults')
@@ -102,7 +99,11 @@ export default function Home() {
                 <p className="text-gray-500">Calculating...</p>
               </div>
             ) : (
-              <ResultsPanel results={results} showRealTerms={inputs.showRealTerms} />
+              <ResultsPanel
+                results={results}
+                showRealTerms={inputs.showRealTerms}
+                inputs={inputs}
+              />
             )}
           </div>
         </div>

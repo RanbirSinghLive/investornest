@@ -1,17 +1,22 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { SummaryCards } from './SummaryCards'
 import { Chart } from './Chart'
 import { NarrativeOutput } from './NarrativeOutput'
-import type { CalculationResults } from '@/lib/types'
+import { SensitivityAnalysis } from './SensitivityAnalysis'
+import { Button } from '../ui/Button'
+import type { CalculationResults, CalculatorInputs } from '@/lib/types'
 
 interface ResultsPanelProps {
   results: CalculationResults | null
   showRealTerms: boolean
+  inputs: CalculatorInputs
 }
 
-export function ResultsPanel({ results, showRealTerms }: ResultsPanelProps) {
+export function ResultsPanel({ results, showRealTerms, inputs }: ResultsPanelProps) {
+  const [showSensitivity, setShowSensitivity] = useState(false)
+
   if (!results) {
     return (
       <div className="bg-white rounded-lg shadow-md p-12 text-center">
@@ -32,6 +37,19 @@ export function ResultsPanel({ results, showRealTerms }: ResultsPanelProps) {
       <SummaryCards results={results} showRealTerms={showRealTerms} />
       <Chart results={results} showRealTerms={showRealTerms} />
       <NarrativeOutput results={results} />
+
+      {/* Sensitivity Analysis Toggle */}
+      <div className="flex justify-center">
+        <Button
+          variant={showSensitivity ? 'secondary' : 'outline'}
+          onClick={() => setShowSensitivity(!showSensitivity)}
+        >
+          {showSensitivity ? 'Hide' : 'Show'} Sensitivity Analysis
+        </Button>
+      </div>
+
+      {/* Sensitivity Analysis */}
+      {showSensitivity && <SensitivityAnalysis inputs={inputs} />}
     </div>
   )
 }

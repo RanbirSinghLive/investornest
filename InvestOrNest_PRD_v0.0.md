@@ -42,24 +42,23 @@ Users want:
 
 | Feature | Description | Acceptance Criteria |
 |----------|-------------|---------------------|
-| **Input panel** | Loan balance (CAD), interest % (annual), years + months remaining, regular payment (monthly CAD), optional extra payment (CAD) with frequency selector (monthly/annual/one-time), expected investment return % (annual, gross), investment account type (RRSP/FHSA/TFSA/RESP/non-registered), province selection, gross annual income (CAD), expected home appreciation % (optional), inflation toggle, inflation rate (%). All inputs with Canadian currency formatting ($CAD). | • All input fields functional with validation<br>• Years (0-50) + months (0-11) for remaining mortgage term<br>• Extra payment frequency: monthly, annual (once per year), or one-time (first month only)<br>• Investment account type dropdown: RRSP, FHSA, TFSA, RESP, non-registered<br>• Province dropdown: All 13 Canadian provinces/territories<br>• Gross income input (CAD) for tax bracket calculation<br>• **Home appreciation slider**: Optional 0-10% annual appreciation rate (default 0%)<br>• **Inflation toggle**: Show results in real (inflation-adjusted) terms<br>• **Inflation rate input**: Default 2%, editable 0-5%<br>• Currency displays in CAD format ($1,234.56)<br>• Sliders + numeric inputs for all fields<br>• Real-time validation (e.g., rates 0-20%, months 0-11, income > 0, inflation 0-5%, appreciation 0-10%)<br>• Inputs persist in localStorage (optional)<br>• **No comparison horizon field** - chart uses mortgage remaining timeline |
-| **Computation engine** | Local TypeScript functions computing Canadian mortgage amortization (semi-annual compounding), investment growth with tax considerations, net worth under both strategies. Supports years + months remaining, extra payment frequencies (monthly/annual/one-time), tax-adjusted returns, optional home appreciation, and optional inflation adjustment. All calculations client-side, no API calls. | • Accurate mortgage calculations matching Canadian bank standards<br>• Handles years + months for remaining mortgage term<br>• Supports monthly, annual, and one-time extra payments<br>• Tax calculation: Uses marginal tax rates (federal + provincial) based on income and province<br>• Account-specific tax treatment: RRSP (tax-deferred), TFSA (tax-free), FHSA (tax-free), RESP (tax-deferred), non-registered (capital gains/dividends)<br>• Investment growth with compound interest and tax-adjusted returns (supports all payment frequencies)<br>• **Home appreciation**: Optional annual appreciation rate (0-10%, default 0%)<br>• **Home value formula**: Home value = Initial value × (1 + appreciation_rate)^(years)<br>• **Inflation adjustment**: Optional conversion of nominal values to real (inflation-adjusted) terms<br>• **Inflation formula**: Real value = Nominal value / (1 + inflation_rate)^(months/12)<br>• Net worth = (home equity + investment balance) where home equity = (appreciated home value - mortgage balance)<br>• Calculations complete in < 100ms<br>• Handles edge cases (zero payments, zero returns) |
-| **Results summary** | Key metrics displayed in summary cards: total wealth under each strategy, net difference (CAD), "break-even return" (the investment return % where strategies are equal), mortgage-free date for each strategy. | • 3-4 summary cards visible above chart<br>• Clear winner indication (Invest vs Prepay)<br>• All values formatted in CAD currency<br>• Break-even return calculated and displayed<br>• Mortgage-free dates shown for both strategies |
+| **Input panel** | Loan balance (CAD), current home value (CAD), interest % (annual), years + months remaining, regular payment (monthly CAD), optional extra payment (CAD) with frequency selector (monthly/annual/one-time), expected investment return % (annual), expected home appreciation % (optional), inflation toggle, inflation rate (%). All inputs with Canadian currency formatting ($CAD). | • All input fields functional with validation<br>• Current home value input (CAD) - base value for home appreciation calculations<br>• Years (0-50) + months (0-11) for remaining mortgage term<br>• Extra payment frequency: monthly, annual (once per year), or one-time (first month only)<br>• **Home appreciation slider**: Optional 0-10% annual appreciation rate (default 0%)<br>• **Inflation toggle**: Show results in real (inflation-adjusted) terms<br>• **Inflation rate input**: Default 2%, editable 0-5%<br>• Currency displays in CAD format ($1,234.56)<br>• Sliders + numeric inputs for all fields<br>• Real-time validation (e.g., rates 0-20%, months 0-11, inflation 0-5%, appreciation 0-10%)<br>• Inputs persist in localStorage (optional)<br>• **No comparison horizon field** - chart uses mortgage remaining timeline |
+| **Computation engine** | Local TypeScript functions computing Canadian mortgage amortization (semi-annual compounding), investment growth, net worth under both strategies. Supports years + months remaining, extra payment frequencies (monthly/annual/one-time), optional home appreciation, and optional inflation adjustment. All calculations client-side, no API calls. | • Accurate mortgage calculations matching Canadian bank standards<br>• Handles years + months for remaining mortgage term<br>• Supports monthly, annual, and one-time extra payments<br>• Investment growth with compound interest (supports all payment frequencies)<br>• **Home appreciation**: Optional annual appreciation rate (0-10%, default 0%)<br>• **Home value formula**: Home value = Current home value × (1 + appreciation_rate)^(years)<br>• **Inflation adjustment**: Optional conversion of nominal values to real (inflation-adjusted) terms<br>• **Inflation formula**: Real value = Nominal value / (1 + inflation_rate)^(months/12)<br>• Net worth = (home equity + investment balance) where home equity = (appreciated home value - mortgage balance)<br>• Calculations complete in < 100ms<br>• Handles edge cases (zero payments, zero returns) |
+| **Results summary** | Key metrics displayed in summary cards: total wealth under each strategy, net difference (CAD), "break-even return" (the investment return % where strategies are equal), mortgage-free date for each strategy. Optional sensitivity analysis table showing how break-even shifts with input variations. | • 3-4 summary cards visible above chart<br>• Clear winner indication (Invest vs Prepay)<br>• All values formatted in CAD currency<br>• Break-even return calculated and displayed<br>• Mortgage-free dates shown for both strategies<br>• **Sensitivity Analysis**: Toggle to show table with investment return variations (±1%, ±2%)<br>• Sensitivity table shows break-even return, net worth difference, and winner for each scenario |
 | **Charts** | Interactive line chart showing net-worth trajectories over time for both strategies (Invest vs Prepay). Chart maps to the mortgage remaining timeline (years + months). Chart updates in real-time as inputs change. Supports inflation-adjusted display. | • Line chart with 2 series (Invest strategy, Prepay strategy)<br>• X-axis: time based on mortgage remaining timeline (years), Y-axis: net worth (CAD) with "(Real Terms)" label when inflation-adjusted<br>• Chart timeline matches mortgage remaining term (years + months)<br>• Chart title shows "(Inflation-Adjusted)" when real terms toggle is enabled<br>• Chart library loads and renders correctly<br>• Responsive sizing (mobile/desktop)<br>• Tooltips showing exact values on hover with month numbers<br>• Visual indicator banner when real terms are enabled |
 | **Plain-English output** | Deterministic paragraph summarizing outcome in Canadian context: "Investing wins by $X after Y years, but mortgage lasts N years longer. Based on Canadian mortgage rates and investment returns." | • Narrative generated from calculation results<br>• Mentions specific dollar amounts and timeframes<br>• Mentions Canadian context (optional)<br>• Clear, jargon-free language<br>• Updates when inputs change |
-| **Assumptions section** | Clear static text listing default assumptions visible on main page or About page: constant rates, semi-annual mortgage compounding (Canadian standard), annual investment compounding, tax-adjusted returns based on account type and marginal tax rates, tax rates based on current year (2024/2025), no inflation adjustment. | • Assumptions clearly listed and visible<br>• Mentions Canadian mortgage compounding standard<br>• Explains tax calculation methodology<br>• Mentions tax rates are estimates based on current year<br>• Explains account-specific tax treatment<br>• Accessible from main page or About page<br>• Plain language, not technical jargon |
+| **Assumptions section** | Clear static text listing default assumptions visible on main page or About page: constant rates, semi-annual mortgage compounding (Canadian standard), annual investment compounding, no inflation adjustment by default. | • Assumptions clearly listed and visible<br>• Mentions Canadian mortgage compounding standard<br>• Accessible from main page or About page<br>• Plain language, not technical jargon |
 | **Mobile-friendly UI** | Fully responsive layout that works on mobile devices (iOS Safari, Android Chrome). Inputs stack vertically, charts resize, touch-friendly controls. | • Responsive breakpoints: mobile (< 768px), tablet (768-1024px), desktop (> 1024px)<br>• Touch-friendly input controls (sliders, buttons)<br>• Charts readable on mobile screens<br>• No horizontal scrolling<br>• Tested on iOS Safari and Android Chrome |
 | **Privacy disclaimer** | Clear disclaimer visible on main page: "Educational tool — not financial advice; all data stays local; no personal information collected." Links to privacy policy (PIPEDA compliant). | • Disclaimer visible on main calculator page<br>• Mentions data stays local<br>• Mentions not financial advice<br>• Links to privacy policy page<br>• PIPEDA compliance mentioned |
 | **Canadian localization** | All currency, date formats, and language tailored for Canadian users. Default assumptions reflect Canadian mortgage standards (semi-annual compounding). | • Currency: CAD ($) format throughout<br>• Dates: Canadian format (DD/MM/YYYY or Month DD, YYYY)<br>• Mortgage calculations use Canadian compounding standard<br>• Language: Canadian English spelling (e.g., "colour" if applicable) |
 
 ### 🚀 Nice-to-Have (v0.1+)
+- ✅ **Sensitivity Analysis** - Table showing how break-even point shifts with input variations (investment return ±1-2%)
 - Scenario saving (localStorage).  
 - PDF / image export of results.  
 - AI-generated narrative summary.  
-- Inflation adjustment fields.  
-- “Share your result” card generator.
-- Historical tax rate data for multiple years.
-- Tax bracket visualization.  
+- "Share your result" card generator.
+- Sensitivity analysis chart visualization (Recharts area plot).  
 
 ## 6. 🧮 Core Formulae (Logic Outline)
 
@@ -82,13 +81,13 @@ Where:
   - **Annual**: Extra payment applied once per year (at end of year: month 12, 24, 36, etc.)
   - **One-time**: Extra payment applied only in the first month
 
-**Investment Growth (Future Value of Annuity) with Tax Considerations:**
+**Investment Growth (Future Value of Annuity):**
 ```
-FV = PMT * [((1+r_net)^n – 1) / r_net]  (for monthly contributions)
+FV = PMT * [((1+r)^n – 1) / r]  (for monthly contributions)
 ```
 Where:
 - PMT = Investment contribution amount
-- r_net = Monthly return rate after tax (annual return * (1 - effective_tax_rate) / 12)
+- r = Monthly return rate (annual return / 12)
 - n = Number of months
 - **Payment Frequencies Supported:**
   - **Monthly**: Contribution applied every month
@@ -96,24 +95,10 @@ Where:
   - **One-time**: Contribution applied only in the first month
 - All contributions use monthly compounding
 
-**Tax Calculation:**
-- **Marginal Tax Rate**: Federal + Provincial rates based on gross income and province
-- **Account-Specific Tax Treatment:**
-  - **RRSP**: Tax-deferred (no tax on growth, taxed on withdrawal at marginal rate)
-  - **TFSA**: Tax-free (no tax on growth or withdrawal)
-  - **FHSA**: Tax-free (no tax on growth or withdrawal, if used for first home)
-  - **RESP**: Tax-deferred (no tax on growth, taxed on withdrawal at beneficiary's rate)
-  - **Non-Registered**: Taxed annually on capital gains (50% inclusion) and dividends (gross-up and dividend tax credit)
-- **Effective Tax Rate Calculation:**
-  - For RRSP: Assumes withdrawal at same marginal rate (simplified)
-  - For TFSA/FHSA: 0% tax rate
-  - For RESP: Assumes beneficiary's marginal rate (simplified)
-  - For Non-Registered: Capital gains rate = marginal_rate * 0.5, dividends use dividend tax credit
-- **Net Return Formula**: `net_return = gross_return * (1 - effective_tax_rate)`
-
 **Home Appreciation:**
 - **Optional Feature**: Simple slider for expected annual home appreciation rate (0-10%, default 0%)
-- **Formula**: `Home Value = Initial Value × (1 + appreciation_rate)^(years)`
+- **Base Value**: Current home value (user input, separate from loan balance)
+- **Formula**: `Home Value = Current Home Value × (1 + appreciation_rate)^(years)`
 - **Application**: Home value compounds annually, affecting home equity calculation
 - **Purpose**: Shows how home equity growth interacts with mortgage payoff decisions
 - **Impact**: Higher appreciation increases home equity, which affects net worth comparison
@@ -135,13 +120,9 @@ Where:
 
 **Additional Canadian Considerations:**
 - All calculations in CAD currency
-- Tax rates: Federal and provincial marginal tax rates maintained in codebase (2024/2025 tax year)
-- Tax brackets: Progressive tax system with multiple brackets per province
-- Account types: Different tax treatment based on registered vs non-registered accounts
 - Inflation adjustment: Optional feature with default 2% rate (editable)
 - Home appreciation: Optional feature with default 0% rate (editable 0-10%)
-- Home value: Starts at initial loan balance, appreciates annually if rate > 0%
-- Tax rates updated annually (manual maintenance required)
+- Home value: Starts at current home value (user input), appreciates annually if rate > 0%
 
 ## 7. 🧱 Technical Architecture
 
@@ -183,7 +164,8 @@ investornest/
 │   │   ├── ResultsPanel.tsx     # Right panel with results
 │   │   ├── SummaryCards.tsx     # Winner, Δ Net Worth, Mortgage-Free Date
 │   │   ├── Chart.tsx            # Net worth trajectory chart
-│   │   └── NarrativeOutput.tsx  # Plain-English explanation
+│   │   ├── NarrativeOutput.tsx  # Plain-English explanation
+│   │   └── SensitivityAnalysis.tsx  # Sensitivity analysis table
 │   └── layout/
 │       ├── Navbar.tsx
 │       └── Footer.tsx
@@ -191,9 +173,9 @@ investornest/
 │   ├── calculations/
 │   │   ├── mortgage.ts          # Mortgage amortization functions
 │   │   ├── investment.ts        # Investment growth functions
-│   │   ├── tax.ts               # Tax calculation functions and tax rate tables
 │   │   ├── comparison.ts        # Net worth comparison logic
-│   │   └── breakEven.ts         # Break-even return calculation
+│   │   ├── breakEven.ts         # Break-even return calculation
+│   │   └── sensitivity.ts       # Sensitivity analysis calculations
 │   ├── utils/
 │   │   ├── formatters.ts        # Currency, percentage, date formatters
 │   │   ├── validators.ts        # Input validation functions
@@ -225,21 +207,17 @@ investornest/
 **Core Input Types:**
 ```typescript
 type ExtraPaymentFrequency = 'monthly' | 'annual' | 'one-time'
-type InvestmentAccountType = 'RRSP' | 'FHSA' | 'TFSA' | 'RESP' | 'non-registered'
-type CanadianProvince = 'AB' | 'BC' | 'MB' | 'NB' | 'NL' | 'NS' | 'NT' | 'NU' | 'ON' | 'PE' | 'QC' | 'SK' | 'YT'
 
 interface CalculatorInputs {
   loanBalance: number;           // Current mortgage balance (CAD)
+  currentHomeValue: number;       // Current home value (CAD) - base for appreciation
   interestRate: number;           // Annual interest rate (%)
   yearsRemaining: number;         // Years left on mortgage (0-50)
   monthsRemaining: number;         // Additional months left on mortgage (0-11)
   regularPayment: number;         // Monthly payment amount (CAD)
   extraPayment: number;           // Extra payment amount (CAD)
   extraPaymentFrequency: ExtraPaymentFrequency; // Frequency: monthly, annual, or one-time
-  expectedReturn: number;         // Expected annual investment return (%, gross before tax)
-  investmentAccountType: InvestmentAccountType; // Account type for tax calculation
-  province: CanadianProvince;      // Province for provincial tax rate
-  grossIncome: number;             // Gross annual income (CAD) for tax bracket calculation
+  expectedReturn: number;         // Expected annual investment return (%)
   showRealTerms: boolean;          // Toggle to show inflation-adjusted (real) terms
   inflationRate: number;           // Annual inflation rate (%) - default 2%
   homeAppreciationRate: number;    // Expected annual home appreciation rate (%) - default 0%
@@ -286,24 +264,27 @@ interface MonthlyData {
 
 **InputPanel Component:**
 - Manages all user inputs via controlled components
-- Real-time validation (e.g., interest rate 0-20%, years > 0, income > 0)
+- Real-time validation (e.g., interest rate 0-20%, years >= 0)
 - Sliders for visual input + numeric fields for precision
-- Dropdowns for province and investment account type
 - Canadian currency formatting ($CAD)
 - Triggers calculation on input change (debounced)
-- Tax-related inputs: province, gross income, investment account type
 
 **ResultsPanel Component:**
 - Displays SummaryCards, Chart, and NarrativeOutput
-- Receives calculation results as props
+- Optional SensitivityAnalysis component (toggleable)
+- Receives calculation results and inputs as props
 - Handles loading/error states
 - Responsive grid layout (stacks on mobile)
 
+**SensitivityAnalysis Component:**
+- Table view showing break-even variations
+- Scenarios: Investment return ±1%, ±2%
+- Color-coded winner indicators (green=invest, red=prepay)
+- Uses useMemo for performance optimization
+- Responsive table with horizontal scroll on mobile
+
 **Calculation Engine:**
 - Pure functions in `lib/calculations/`
-- Tax calculation module: `lib/calculations/tax.ts` with marginal tax rate tables
-- Tax rate data: Federal and provincial brackets maintained in codebase
-- Account-specific tax logic: Different effective rates based on account type
 - No side effects, deterministic outputs
 - Handles edge cases (zero extra payment, zero return, etc.)
 - Validates inputs before computation

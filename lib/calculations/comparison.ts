@@ -7,12 +7,11 @@ import type { CalculatorInputs, CalculationResults, MonthlyData, StrategyResult 
 import { calculateMortgageAmortization } from './mortgage'
 import { calculateInvestmentBreakdown } from './investment'
 import { calculateMortgageFreeDate } from './mortgage'
-import { calculateNetReturn } from './tax'
 import { getInflationAdjustmentFactor } from '../utils/inflation'
 
 /**
  * Calculate home value with appreciation over time
- * @param initialHomeValue Starting home value (typically = loan balance)
+ * @param initialHomeValue Starting home value (current home value)
  * @param appreciationRate Annual appreciation rate as percentage
  * @param months Number of months from present
  * @returns Home value after appreciation
@@ -105,7 +104,7 @@ function calculatePrepayStrategy(
     const investment = investmentBreakdown[i] || 0
     // Calculate home value with appreciation
     const homeValue = calculateHomeValueWithAppreciation(
-      inputs.loanBalance,
+      inputs.currentHomeValue,
       inputs.homeAppreciationRate,
       mortgage.month
     )
@@ -159,17 +158,9 @@ function calculateInvestStrategy(
   )
 
   // In invest strategy, extra payment goes to investment
-  // Calculate net return after tax
-  const netReturn = calculateNetReturn(
-    inputs.expectedReturn,
-    inputs.investmentAccountType,
-    inputs.grossIncome,
-    inputs.province
-  )
-
   const investmentBreakdown = calculateInvestmentBreakdown(
     inputs.extraPayment,
-    netReturn, // Use net return (after tax)
+    inputs.expectedReturn, // Use gross return (no tax adjustment)
     horizonMonths, // Use full horizon
     inputs.extraPaymentFrequency,
     0
@@ -190,7 +181,7 @@ function calculateInvestStrategy(
     const investment = investmentBreakdown[i] || 0
     // Calculate home value with appreciation
     const homeValue = calculateHomeValueWithAppreciation(
-      inputs.loanBalance,
+      inputs.currentHomeValue,
       inputs.homeAppreciationRate,
       mortgage.month
     )
@@ -321,9 +312,6 @@ export function calculateComparison(inputs: CalculatorInputs): CalculationResult
     `📅 Mortgage remaining: ${totalMonthsRemaining} months (${inputs.yearsRemaining} years, ${inputs.monthsRemaining} months)`
   )
   console.log(`💰 Extra payment: ${inputs.extraPayment} CAD (${inputs.extraPaymentFrequency})`)
-  console.log(
-    `💼 Investment: ${inputs.investmentAccountType}, Province: ${inputs.province}, Income: ${inputs.grossIncome.toLocaleString('en-CA')} CAD`
-  )
   console.log(
     `🏠 Home appreciation: ${inputs.homeAppreciationRate}% annually${inputs.homeAppreciationRate > 0 ? ' (affects home equity growth)' : ' (no appreciation)'}`
   )

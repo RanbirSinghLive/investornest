@@ -7,11 +7,8 @@ import { Card } from '../ui/Card'
 import type {
   CalculatorInputs,
   ExtraPaymentFrequency,
-  InvestmentAccountType,
-  CanadianProvince,
 } from '@/lib/types'
 import { formatCurrency, formatPercentage } from '@/lib/utils/formatters'
-import { getTaxRateInfo } from '@/lib/calculations/tax'
 
 interface InputPanelProps {
   inputs: CalculatorInputs
@@ -22,17 +19,11 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
   const handleChange = useCallback(
     (
       field: keyof CalculatorInputs,
-      value: number | ExtraPaymentFrequency | InvestmentAccountType | CanadianProvince
+      value: number | ExtraPaymentFrequency | boolean
     ) => {
       onChange({ ...inputs, [field]: value })
     },
     [inputs, onChange]
-  )
-
-  const taxInfo = useMemo(
-    () =>
-      getTaxRateInfo(inputs.grossIncome || 0, inputs.province, inputs.investmentAccountType),
-    [inputs.grossIncome, inputs.province, inputs.investmentAccountType]
   )
 
   return (
@@ -59,6 +50,29 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             step={10000}
             onChange={(e) => handleChange('loanBalance', Number(e.target.value))}
             className="mt-2"
+          />
+        </div>
+
+        <div>
+          <Slider
+            label="Current Home Value"
+            value={inputs.currentHomeValue}
+            min={10000}
+            max={5000000}
+            step={10000}
+            formatValue={formatCurrency}
+            onChange={(e) => handleChange('currentHomeValue', Number(e.target.value))}
+          />
+          <Input
+            type="number"
+            label="Current Home Value (CAD)"
+            value={inputs.currentHomeValue}
+            min={10000}
+            max={10000000}
+            step={10000}
+            onChange={(e) => handleChange('currentHomeValue', Number(e.target.value))}
+            className="mt-2"
+            helperText="Current market value of your home. Used as the base for home appreciation calculations."
           />
         </div>
 
@@ -225,107 +239,15 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             />
             <Input
               type="number"
-              label="Expected Annual Return - Gross (%)"
+              label="Expected Annual Return (%)"
               value={inputs.expectedReturn}
               min={0}
               max={15}
               step={0.1}
               onChange={(e) => handleChange('expectedReturn', Number(e.target.value))}
               className="mt-2"
-              helperText="Gross return before tax. Net return will be calculated based on account type and tax rates."
+              helperText="Expected annual investment return percentage."
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Investment Account Type
-            </label>
-            <select
-              value={inputs.investmentAccountType}
-              onChange={(e) =>
-                handleChange('investmentAccountType', e.target.value as InvestmentAccountType)
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="TFSA">TFSA (Tax-Free Savings Account)</option>
-              <option value="FHSA">FHSA (First Home Savings Account)</option>
-              <option value="RRSP">RRSP (Registered Retirement Savings Plan)</option>
-              <option value="RESP">RESP (Registered Education Savings Plan)</option>
-              <option value="non-registered">Non-Registered Account</option>
-            </select>
-            <p className="mt-1 text-sm text-gray-500">
-              {inputs.investmentAccountType === 'TFSA' &&
-                'Tax-free: No tax on growth or withdrawal'}
-              {inputs.investmentAccountType === 'FHSA' &&
-                'Tax-free: No tax on growth or withdrawal (if used for first home)'}
-              {inputs.investmentAccountType === 'RRSP' &&
-                'Tax-deferred: Taxed on withdrawal at marginal rate'}
-              {inputs.investmentAccountType === 'RESP' &&
-                'Tax-deferred: Taxed on withdrawal at beneficiary\'s rate'}
-              {inputs.investmentAccountType === 'non-registered' &&
-                'Taxable: Capital gains (50% inclusion) and dividends taxed annually'}
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Province</label>
-            <select
-              value={inputs.province}
-              onChange={(e) =>
-                handleChange('province', e.target.value as CanadianProvince)
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            >
-              <option value="AB">Alberta</option>
-              <option value="BC">British Columbia</option>
-              <option value="MB">Manitoba</option>
-              <option value="NB">New Brunswick</option>
-              <option value="NL">Newfoundland and Labrador</option>
-              <option value="NS">Nova Scotia</option>
-              <option value="NT">Northwest Territories</option>
-              <option value="NU">Nunavut</option>
-              <option value="ON">Ontario</option>
-              <option value="PE">Prince Edward Island</option>
-              <option value="QC">Quebec</option>
-              <option value="SK">Saskatchewan</option>
-              <option value="YT">Yukon</option>
-            </select>
-            <p className="mt-1 text-sm text-gray-500">
-              Used to calculate provincial tax rates
-            </p>
-          </div>
-
-          <div>
-            <Slider
-              label="Gross Annual Income"
-              value={inputs.grossIncome}
-              min={0}
-              max={500000}
-              step={1000}
-              formatValue={formatCurrency}
-              onChange={(e) => handleChange('grossIncome', Number(e.target.value))}
-            />
-            <Input
-              type="number"
-              label="Gross Annual Income (CAD)"
-              value={inputs.grossIncome}
-              min={0}
-              max={500000}
-              step={1000}
-              onChange={(e) => handleChange('grossIncome', Number(e.target.value))}
-              className="mt-2"
-              helperText="Used to determine your marginal tax bracket"
-            />
-            <p className="mt-1 text-sm text-gray-600">
-              Approx. combined marginal tax rate:{' '}
-              <span className="font-semibold">
-                {(taxInfo.combinedRate * 100).toFixed(1)}%
-              </span>{' '}
-              <span className="text-gray-500">
-                ({(taxInfo.federalRate * 100).toFixed(1)}% federal +{' '}
-                {(taxInfo.provincialRate * 100).toFixed(1)}% provincial)
-              </span>
-            </p>
           </div>
 
           <div>
