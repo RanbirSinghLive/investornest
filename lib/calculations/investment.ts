@@ -1,6 +1,7 @@
 /**
  * Investment growth calculations
  * Supports monthly, annual, or one-time contributions with monthly compounding
+ * Uses net return rate (after tax) for calculations
  */
 
 import type { ExtraPaymentFrequency } from '../types'

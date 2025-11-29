@@ -16,7 +16,9 @@ const DEFAULT_INPUTS: CalculatorInputs = {
   extraPayment: 500,
   extraPaymentFrequency: 'monthly',
   expectedReturn: 7,
-  comparisonHorizon: 20,
+  investmentAccountType: 'TFSA',
+  province: 'ON',
+  grossIncome: 100000,
 }
 
 export default function Home() {

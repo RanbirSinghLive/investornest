@@ -52,11 +52,12 @@ export function calculateMortgageAmortization(
   let balance = initialBalance
   let totalInterestPaid = 0
   let totalPaid = 0
+  let mortgagePaidOff = false
 
-  for (let month = 0; month < horizonMonths && balance > 0; month++) {
+  for (let month = 0; month < horizonMonths; month++) {
     // Determine if extra payment applies this month
     let extraThisMonth = 0
-    if (extraPayment > 0) {
+    if (extraPayment > 0 && !mortgagePaidOff) {
       if (extraPaymentFrequency === 'monthly') {
         extraThisMonth = extraPayment
       } else if (extraPaymentFrequency === 'annual') {
@@ -72,12 +73,24 @@ export function calculateMortgageAmortization(
       }
     }
 
-    const totalPayment = regularMonthlyPayment + extraThisMonth
-    const interestPayment = balance * monthlyRate
-    const principalPayment = Math.min(totalPayment - interestPayment, balance)
-    balance -= principalPayment
-    totalInterestPaid += interestPayment
-    totalPaid += totalPayment
+    if (!mortgagePaidOff && balance > 0.01) {
+      const totalPayment = regularMonthlyPayment + extraThisMonth
+      const interestPayment = balance * monthlyRate
+      const principalPayment = Math.min(totalPayment - interestPayment, balance)
+      balance -= principalPayment
+      totalInterestPaid += interestPayment
+      totalPaid += totalPayment
+
+      // Check if mortgage is paid off
+      if (balance <= 0.01) {
+        balance = 0
+        mortgagePaidOff = true
+      }
+    } else {
+      // Mortgage is paid off - no more payments, but continue tracking months
+      mortgagePaidOff = true
+      balance = 0
+    }
 
     breakdown.push({
       month: month + 1,
@@ -87,11 +100,6 @@ export function calculateMortgageAmortization(
       totalPaid,
       interestPaid: totalInterestPaid,
     })
-
-    // If balance is paid off, stop
-    if (balance <= 0.01) {
-      break
-    }
   }
 
   return breakdown

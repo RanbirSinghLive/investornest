@@ -7,6 +7,7 @@ import type { CalculatorInputs, CalculationResults, MonthlyData, StrategyResult 
 import { calculateMortgageAmortization } from './mortgage'
 import { calculateInvestmentBreakdown } from './investment'
 import { calculateMortgageFreeDate } from './mortgage'
+import { calculateNetReturn } from './tax'
 
 /**
  * Calculate net worth for a strategy
@@ -41,19 +42,30 @@ function calculatePrepayStrategy(
   )
 
   // In prepay strategy, extra payment goes to mortgage, so no investment
-  const investmentBreakdown = new Array(Math.max(horizonMonths, mortgageBreakdown.length)).fill(0)
+  const investmentBreakdown = new Array(horizonMonths).fill(0)
 
-  const monthlyData: MonthlyData[] = mortgageBreakdown.map((mortgage, index) => {
-    const investment = investmentBreakdown[index] || 0
+  // Ensure both arrays have the same length (horizonMonths)
+  const monthlyData: MonthlyData[] = []
+
+  for (let i = 0; i < horizonMonths; i++) {
+    const mortgage = mortgageBreakdown[i] || {
+      month: i + 1,
+      mortgageBalance: 0, // If mortgage paid off early, balance is 0
+      investmentBalance: 0,
+      netWorth: 0,
+      totalPaid: mortgageBreakdown[mortgageBreakdown.length - 1]?.totalPaid || 0,
+      interestPaid: mortgageBreakdown[mortgageBreakdown.length - 1]?.interestPaid || 0,
+    }
+    const investment = investmentBreakdown[i] || 0
     const homeValue = inputs.loanBalance // Assume home value = initial loan
     const netWorth = calculateNetWorth(homeValue, mortgage.mortgageBalance, investment)
 
-    return {
+    monthlyData.push({
       ...mortgage,
       investmentBalance: investment,
       netWorth,
-    }
-  })
+    })
+  }
 
   const finalData = monthlyData[monthlyData.length - 1] || monthlyData[0]
   const mortgageFreeDate = calculateMortgageFreeDate(
@@ -94,28 +106,35 @@ function calculateInvestStrategy(
   )
 
   // In invest strategy, extra payment goes to investment
+  // Calculate net return after tax
+  const netReturn = calculateNetReturn(
+    inputs.expectedReturn,
+    inputs.investmentAccountType,
+    inputs.grossIncome,
+    inputs.province
+  )
+
   const investmentBreakdown = calculateInvestmentBreakdown(
     inputs.extraPayment,
-    inputs.expectedReturn,
-    Math.max(horizonMonths, mortgageBreakdown.length),
+    netReturn, // Use net return (after tax)
+    horizonMonths, // Use full horizon
     inputs.extraPaymentFrequency,
     0
   )
 
-  // Ensure both arrays have the same length
-  const maxLength = Math.max(mortgageBreakdown.length, investmentBreakdown.length)
+  // Both arrays should have the same length (horizonMonths)
   const monthlyData: MonthlyData[] = []
 
-  for (let i = 0; i < maxLength; i++) {
+  for (let i = 0; i < horizonMonths; i++) {
     const mortgage = mortgageBreakdown[i] || {
       month: i + 1,
-      mortgageBalance: mortgageBreakdown[mortgageBreakdown.length - 1]?.mortgageBalance || 0,
+      mortgageBalance: 0, // If mortgage paid off early, balance is 0
       investmentBalance: 0,
       netWorth: 0,
       totalPaid: mortgageBreakdown[mortgageBreakdown.length - 1]?.totalPaid || 0,
       interestPaid: mortgageBreakdown[mortgageBreakdown.length - 1]?.interestPaid || 0,
     }
-    const investment = investmentBreakdown[i] || investmentBreakdown[investmentBreakdown.length - 1] || 0
+    const investment = investmentBreakdown[i] || 0
     const homeValue = inputs.loanBalance // Assume home value = initial loan
     const netWorth = calculateNetWorth(homeValue, mortgage.mortgageBalance, investment)
 
@@ -156,9 +175,17 @@ function generateNarrative(
 ): string {
   const difference = invest.netWorth - prepay.netWorth
   const absDifference = Math.abs(difference)
+  const totalYears = inputs.yearsRemaining
+  const totalMonths = inputs.monthsRemaining
+  const yearsText =
+    totalYears > 0
+      ? totalMonths > 0
+        ? `${totalYears} years and ${totalMonths} months`
+        : `${totalYears} ${totalYears === 1 ? 'year' : 'years'}`
+      : `${totalMonths} ${totalMonths === 1 ? 'month' : 'months'}`
 
   if (Math.abs(difference) < 1000) {
-    return `Both strategies yield similar results. After ${inputs.comparisonHorizon} years, the difference in net worth is approximately ${Math.abs(difference) < 100 ? 'negligible' : `$${absDifference.toLocaleString('en-CA')}`}.`
+    return `Both strategies yield similar results. Over the remaining mortgage term (${yearsText}), the difference in net worth is approximately ${Math.abs(difference) < 100 ? 'negligible' : `$${absDifference.toLocaleString('en-CA')}`}.`
   }
 
   const winner = difference > 0 ? 'investing' : 'prepaying'
@@ -173,10 +200,10 @@ function generateNarrative(
       )
     : null
 
-  let narrative = `After ${inputs.comparisonHorizon} years, ${winner} your extra payment results in a net worth that is $${absDifference.toLocaleString('en-CA')} higher.`
+  let narrative = `Over the remaining mortgage term (${yearsText}), ${winner} your extra payment results in a net worth that is $${absDifference.toLocaleString('en-CA')} higher.`
 
   if (prepayYears && investYears && prepayYears < investYears) {
-    narrative += ` However, prepaying your mortgage would make you mortgage-free ${investYears - prepayYears} years earlier.`
+    narrative += ` However, prepaying your mortgage would make you mortgage-free ${investYears - prepayYears} ${investYears - prepayYears === 1 ? 'year' : 'years'} earlier.`
   }
 
   return narrative
@@ -234,16 +261,18 @@ export function calculateComparison(inputs: CalculatorInputs): CalculationResult
     `📅 Mortgage remaining: ${totalMonthsRemaining} months (${inputs.yearsRemaining} years, ${inputs.monthsRemaining} months)`
   )
   console.log(`💰 Extra payment: ${inputs.extraPayment} CAD (${inputs.extraPaymentFrequency})`)
-  const horizonMonths = Math.floor(inputs.comparisonHorizon * 12)
-  console.log(`📅 Comparison horizon: ${horizonMonths} months (${inputs.comparisonHorizon} years)`)
+  console.log(
+    `💼 Investment: ${inputs.investmentAccountType}, Province: ${inputs.province}, Income: ${inputs.grossIncome.toLocaleString('en-CA')} CAD`
+  )
+  console.log(`📅 Using mortgage remaining timeline: ${totalMonthsRemaining} months`)
 
-  const prepayStrategy = calculatePrepayStrategy(inputs, horizonMonths)
+  const prepayStrategy = calculatePrepayStrategy(inputs, totalMonthsRemaining)
   console.log('✅ Prepay strategy calculated:', {
     netWorth: prepayStrategy.netWorth,
     mortgageFreeDate: prepayStrategy.mortgageFreeDate,
   })
 
-  const investStrategy = calculateInvestStrategy(inputs, horizonMonths)
+  const investStrategy = calculateInvestStrategy(inputs, totalMonthsRemaining)
   console.log('✅ Invest strategy calculated:', {
     netWorth: investStrategy.netWorth,
     mortgageFreeDate: investStrategy.mortgageFreeDate,
@@ -257,7 +286,7 @@ export function calculateComparison(inputs: CalculatorInputs): CalculationResult
         ? 'invest'
         : 'prepay'
 
-  const breakEvenReturn = calculateBreakEvenReturn(inputs, horizonMonths)
+  const breakEvenReturn = calculateBreakEvenReturn(inputs, totalMonthsRemaining)
   console.log(`💰 Break-even return: ${breakEvenReturn.toFixed(2)}%`)
 
   const narrative = generateNarrative(prepayStrategy, investStrategy, inputs)

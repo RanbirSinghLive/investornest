@@ -4,6 +4,21 @@
  */
 
 export type ExtraPaymentFrequency = 'monthly' | 'annual' | 'one-time'
+export type InvestmentAccountType = 'RRSP' | 'FHSA' | 'TFSA' | 'RESP' | 'non-registered'
+export type CanadianProvince =
+  | 'AB'
+  | 'BC'
+  | 'MB'
+  | 'NB'
+  | 'NL'
+  | 'NS'
+  | 'NT'
+  | 'NU'
+  | 'ON'
+  | 'PE'
+  | 'QC'
+  | 'SK'
+  | 'YT'
 
 export interface CalculatorInputs {
   loanBalance: number // Current mortgage balance (CAD)
@@ -13,8 +28,10 @@ export interface CalculatorInputs {
   regularPayment: number // Monthly payment amount (CAD)
   extraPayment: number // Extra payment amount (CAD)
   extraPaymentFrequency: ExtraPaymentFrequency // Frequency of extra payment
-  expectedReturn: number // Expected annual investment return (%)
-  comparisonHorizon: number // Years to compare (e.g., 10, 20, 30)
+  expectedReturn: number // Expected annual investment return (%, gross before tax)
+  investmentAccountType: InvestmentAccountType // Account type for tax calculation
+  province: CanadianProvince // Province for provincial tax rate
+  grossIncome: number // Gross annual income (CAD) for tax bracket calculation
 }
 
 export interface MonthlyData {
