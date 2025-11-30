@@ -26,10 +26,10 @@ export function SummaryCards({ results, showRealTerms }: SummaryCardsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <Card className="bg-gradient-to-br from-primary-50 to-primary-100">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <Card className="bg-gradient-to-br from-primary-50 to-primary-100 min-w-0">
         <div className="text-sm font-medium text-gray-600 mb-1">Winner</div>
-        <div className={`text-2xl font-bold ${winnerColor[comparison.winner]}`}>
+        <div className={`text-xl font-bold ${winnerColor[comparison.winner]}`}>
           {winnerText[comparison.winner]}
         </div>
         <div className="text-sm text-gray-600 mt-2">
@@ -39,10 +39,10 @@ export function SummaryCards({ results, showRealTerms }: SummaryCardsProps) {
         </div>
       </Card>
 
-      <Card>
+      <Card className="min-w-0">
         <div className="text-sm font-medium text-gray-600 mb-1">Net Worth Difference</div>
         <div
-          className={`text-2xl font-bold ${
+          className={`text-xl font-bold ${
             comparison.netWorthDifference > 0 ? 'text-primary-600' : 'text-secondary-600'
           }`}
         >
@@ -51,40 +51,32 @@ export function SummaryCards({ results, showRealTerms }: SummaryCardsProps) {
         </div>
         <div className="text-sm text-gray-600 mt-2">
           {comparison.netWorthDifference > 0
-            ? 'Investing wins'
+            ? 'Investing has higher net worth'
             : comparison.netWorthDifference < 0
-              ? 'Prepaying wins'
-              : 'Tie'}
+              ? 'Prepaying has higher net worth'
+              : 'Strategies are equal'}
         </div>
       </Card>
 
-      <Card>
-        <div className="text-sm font-medium text-gray-600 mb-1">Break-Even Return</div>
-        <div className="text-2xl font-bold text-gray-900">
-          {formatPercentage(comparison.breakEvenReturn, 2)}
-        </div>
-        <div className="text-sm text-gray-600 mt-2">
-          Return needed for strategies to be equal
-        </div>
-      </Card>
-
-      <Card>
+      <Card className="min-w-0">
         <div className="text-sm font-medium text-gray-600 mb-1">Prepay Mortgage-Free Date</div>
-        <div className="text-lg font-bold text-gray-900">
+        <div className="text-xl font-bold text-gray-900">
           {prepayStrategy.mortgageFreeDate
             ? formatDate(prepayStrategy.mortgageFreeDate)
-            : 'Not calculated'}
+            : 'Beyond term'}
         </div>
         <div className="text-sm text-gray-600 mt-2">
-          {investStrategy.mortgageFreeDate && prepayStrategy.mortgageFreeDate
-            ? `${
-                Math.ceil(
-                  (investStrategy.mortgageFreeDate.getTime() -
-                    prepayStrategy.mortgageFreeDate.getTime()) /
-                    (1000 * 60 * 60 * 24 * 365)
-                )
-              } years earlier than investing`
-            : ''}
+          {prepayStrategy.mortgageFreeDate
+            ? investStrategy.mortgageFreeDate && prepayStrategy.mortgageFreeDate
+              ? `${
+                  Math.ceil(
+                    (investStrategy.mortgageFreeDate.getTime() -
+                      prepayStrategy.mortgageFreeDate.getTime()) /
+                      (1000 * 60 * 60 * 24 * 365)
+                  )
+                } years earlier than investing`
+              : 'With extra payments'
+            : 'Mortgage not paid off within remaining term'}
         </div>
       </Card>
     </div>

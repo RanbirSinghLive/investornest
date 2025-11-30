@@ -17,6 +17,7 @@ export interface CalculatorInputs {
   expectedReturn: number // Expected annual investment return (%)
   showRealTerms: boolean // Toggle to show inflation-adjusted (real) terms
   inflationRate: number // Annual inflation rate (%)
+  useHomeValue: boolean // Toggle to enable home value and appreciation calculations
   homeAppreciationRate: number // Expected annual home appreciation rate (%)
 }
 

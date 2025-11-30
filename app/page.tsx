@@ -8,18 +8,19 @@ import type { CalculatorInputs } from '@/lib/types'
 import { loadPreferences, savePreferences } from '@/lib/utils/storage'
 
 const DEFAULT_INPUTS: CalculatorInputs = {
-  loanBalance: 400000,
-  currentHomeValue: 500000,
-  interestRate: 5.5,
-  yearsRemaining: 25,
-  monthsRemaining: 0,
-  regularPayment: 2500,
-  extraPayment: 500,
+  loanBalance: 10000, // min
+  currentHomeValue: 10000, // min
+  interestRate: 0, // min
+  yearsRemaining: 0, // min
+  monthsRemaining: 0, // min
+  regularPayment: 100, // min
+  extraPayment: 0, // min
   extraPaymentFrequency: 'monthly',
-  expectedReturn: 7,
+  expectedReturn: 0, // min
   showRealTerms: false,
-  inflationRate: 2,
-  homeAppreciationRate: 0,
+  inflationRate: 0, // min
+  useHomeValue: false,
+  homeAppreciationRate: 0, // min
 }
 
 export default function Home() {
@@ -83,9 +84,10 @@ export default function Home() {
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
             Should I Pay Off My Mortgage or Invest?
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 flex items-center gap-2">
             Compare prepaying your mortgage vs investing your extra payment. Built for Canadian
             homeowners.
+            <span className="text-2xl" title="Canadian calculator">🇨🇦</span>
           </p>
         </div>
 

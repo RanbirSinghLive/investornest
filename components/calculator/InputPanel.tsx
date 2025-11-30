@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import { Input } from '../ui/Input'
 import { Slider } from '../ui/Slider'
 import { Card } from '../ui/Card'
@@ -43,36 +43,13 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           />
           <Input
             type="number"
-            label="Loan Balance (CAD)"
             value={inputs.loanBalance}
             min={10000}
             max={2000000}
             step={10000}
             onChange={(e) => handleChange('loanBalance', Number(e.target.value))}
             className="mt-2"
-          />
-        </div>
-
-        <div>
-          <Slider
-            label="Current Home Value"
-            value={inputs.currentHomeValue}
-            min={10000}
-            max={5000000}
-            step={10000}
-            formatValue={formatCurrency}
-            onChange={(e) => handleChange('currentHomeValue', Number(e.target.value))}
-          />
-          <Input
-            type="number"
-            label="Current Home Value (CAD)"
-            value={inputs.currentHomeValue}
-            min={10000}
-            max={10000000}
-            step={10000}
-            onChange={(e) => handleChange('currentHomeValue', Number(e.target.value))}
-            className="mt-2"
-            helperText="Current market value of your home. Used as the base for home appreciation calculations."
+            placeholder="Enter amount"
           />
         </div>
 
@@ -88,13 +65,13 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           />
           <Input
             type="number"
-            label="Annual Interest Rate (%)"
             value={inputs.interestRate}
             min={0}
             max={20}
             step={0.1}
             onChange={(e) => handleChange('interestRate', Number(e.target.value))}
             className="mt-2"
+            placeholder="Enter percentage"
           />
         </div>
 
@@ -111,13 +88,13 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             />
             <Input
               type="number"
-              label="Years Remaining"
               value={inputs.yearsRemaining}
               min={0}
               max={50}
               step={1}
               onChange={(e) => handleChange('yearsRemaining', Number(e.target.value))}
               className="mt-2"
+              placeholder="Enter years"
             />
           </div>
           <div>
@@ -132,7 +109,6 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             />
             <Input
               type="number"
-              label="Months Remaining"
               value={inputs.monthsRemaining}
               min={0}
               max={11}
@@ -144,6 +120,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 handleChange('monthsRemaining', validMonths)
               }}
               className="mt-2"
+              placeholder="Enter months"
             />
           </div>
         </div>
@@ -160,13 +137,13 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           />
           <Input
             type="number"
-            label="Regular Monthly Payment (CAD)"
             value={inputs.regularPayment}
             min={100}
             max={10000}
             step={100}
             onChange={(e) => handleChange('regularPayment', Number(e.target.value))}
             className="mt-2"
+            placeholder="Enter amount"
           />
         </div>
       </div>
@@ -187,13 +164,13 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             />
             <Input
               type="number"
-              label="Extra Payment Amount (CAD)"
               value={inputs.extraPayment}
               min={0}
               max={5000}
               step={100}
               onChange={(e) => handleChange('extraPayment', Number(e.target.value))}
               className="mt-2"
+              placeholder="Enter amount"
             />
           </div>
           <div>
@@ -229,7 +206,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
         <div className="space-y-4">
           <div>
             <Slider
-              label="Expected Annual Return (Gross)"
+              label="Expected Annual Return"
               value={inputs.expectedReturn}
               min={0}
               max={15}
@@ -239,38 +216,107 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             />
             <Input
               type="number"
-              label="Expected Annual Return (%)"
               value={inputs.expectedReturn}
               min={0}
               max={15}
               step={0.1}
               onChange={(e) => handleChange('expectedReturn', Number(e.target.value))}
               className="mt-2"
-              helperText="Expected annual investment return percentage."
+              placeholder="Enter percentage"
             />
+            <div className="mt-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Quick Select
+              </label>
+              <select
+                value=""
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value) {
+                    handleChange('expectedReturn', Number(value))
+                    // Reset dropdown to show placeholder
+                    e.target.value = ''
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+              >
+                <option value="">Select a preset...</option>
+                <option value="3">Conservative (3%)</option>
+                <option value="5">Typical balanced portfolio (5%)</option>
+                <option value="7">Aggressive (7%)</option>
+              </select>
+            </div>
           </div>
 
-          <div>
-            <Slider
-              label="Expected Home Appreciation"
-              value={inputs.homeAppreciationRate}
-              min={0}
-              max={10}
-              step={0.1}
-              formatValue={(v) => formatPercentage(v, 1)}
-              onChange={(e) => handleChange('homeAppreciationRate', Number(e.target.value))}
-            />
-            <Input
-              type="number"
-              label="Expected Home Appreciation (%)"
-              value={inputs.homeAppreciationRate}
-              min={0}
-              max={10}
-              step={0.1}
-              onChange={(e) => handleChange('homeAppreciationRate', Number(e.target.value))}
-              className="mt-2"
-              helperText="Annual home value appreciation rate. Shows how home equity growth affects net worth."
-            />
+          {/* Optional: Home Value & Appreciation */}
+          <div className="border-t pt-4 mt-4">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Home Value & Appreciation
+                </label>
+                <p className="text-xs text-gray-500">
+                  Include home value appreciation in net worth calculations
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={inputs.useHomeValue}
+                  onChange={(e) => handleChange('useHomeValue', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+              </label>
+            </div>
+
+            {inputs.useHomeValue && (
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Slider
+                    label="Current Home Value"
+                    value={inputs.currentHomeValue}
+                    min={10000}
+                    max={5000000}
+                    step={10000}
+                    formatValue={formatCurrency}
+                    onChange={(e) => handleChange('currentHomeValue', Number(e.target.value))}
+                  />
+                  <Input
+                    type="number"
+                    value={inputs.currentHomeValue}
+                    min={10000}
+                    max={10000000}
+                    step={10000}
+                    onChange={(e) => handleChange('currentHomeValue', Number(e.target.value))}
+                    className="mt-2"
+                    placeholder="Enter amount"
+                  />
+                </div>
+
+                <div>
+                  <Slider
+                    label="Expected Home Appreciation"
+                    value={inputs.homeAppreciationRate}
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    formatValue={(v) => formatPercentage(v, 1)}
+                    onChange={(e) => handleChange('homeAppreciationRate', Number(e.target.value))}
+                  />
+                  <Input
+                    type="number"
+                    value={inputs.homeAppreciationRate}
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    onChange={(e) => handleChange('homeAppreciationRate', Number(e.target.value))}
+                    className="mt-2"
+                    placeholder="Enter percentage"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="border-t pt-4 mt-4">
@@ -307,14 +353,13 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 />
                 <Input
                   type="number"
-                  label="Annual Inflation Rate (%)"
                   value={inputs.inflationRate}
                   min={0}
                   max={5}
                   step={0.1}
                   onChange={(e) => handleChange('inflationRate', Number(e.target.value))}
                   className="mt-2"
-                  helperText="Default: 2%. Adjust to reflect your inflation expectations."
+                  placeholder="Enter percentage"
                 />
               </div>
             )}
