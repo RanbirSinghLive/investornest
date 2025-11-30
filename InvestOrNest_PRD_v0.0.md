@@ -284,6 +284,13 @@ interface MonthlyData {
 - Color-coded winner indicators (green=invest, red=prepay)
 - Uses useMemo for performance optimization
 - Responsive table with horizontal scroll on mobile
+- Positioned above Calculation Details in results panel
+
+**CalculationDetails Component:**
+- Expandable section showing calculation methodology
+- Displays formulas for mortgage amortization, investment growth, net worth, inflation adjustment, and break-even return
+- Toggle labeled "Calculation methodology" with transparency indicator
+- Positioned below Sensitivity Analysis in results panel
 
 **Calculation Engine:**
 - Pure functions in `lib/calculations/`
