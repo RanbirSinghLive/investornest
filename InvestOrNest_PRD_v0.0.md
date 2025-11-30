@@ -96,8 +96,10 @@ Where:
 - All contributions use monthly compounding
 
 **Home Appreciation:**
-- **Optional Feature**: Simple slider for expected annual home appreciation rate (0-10%, default 0%)
+- **Optional Feature**: Toggle to enable/disable home value and appreciation calculations
 - **Base Value**: Current home value (user input, separate from loan balance)
+- **When Disabled**: Uses loan balance as home value, appreciation rate = 0%
+- **When Enabled**: Uses current home value input, applies appreciation rate
 - **Formula**: `Home Value = Current Home Value × (1 + appreciation_rate)^(years)`
 - **Application**: Home value compounds annually, affecting home equity calculation
 - **Purpose**: Shows how home equity growth interacts with mortgage payoff decisions
@@ -108,7 +110,7 @@ Where:
 - **Net Worth (Prepay)** = Home Equity + Investment Balance
 - **Net Worth (Invest)** = Home Equity + Investment Balance
 - **ΔNetWorth** = Net Worth (Invest) - Net Worth (Prepay)
-- **Break-Even Return**: The investment return % where ΔNetWorth ≈ 0 (solved numerically using binary search or similar)
+- **Break-Even Return**: The investment return % where ΔNetWorth ≈ 0 (solved numerically using binary search or similar) - calculated internally but not displayed in summary cards
 
 **Inflation Adjustment (Real Terms):**
 - **Optional Feature**: Toggle to show results in real (inflation-adjusted) terms
