@@ -1,5 +1,17 @@
 import React from 'react'
+import type { Metadata } from 'next'
 import { Card } from '@/components/ui/Card'
+
+export const metadata: Metadata = {
+  title: 'About & Assumptions',
+  description:
+    'Learn about InvestOrNest, how it works, key assumptions, and privacy policy. Free Canadian mortgage vs investment calculator with transparent calculations.',
+  openGraph: {
+    title: 'About InvestOrNest - Mortgage vs Investment Calculator',
+    description:
+      'Learn about InvestOrNest, how it works, key assumptions, and privacy policy.',
+  },
+}
 
 export default function AboutPage() {
   return (
