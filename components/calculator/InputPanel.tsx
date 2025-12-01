@@ -28,17 +28,137 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
 
   return (
     <Card className="space-y-6">
-      {/* 1. Money to Allocate */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Money to Allocate</h2>
+      <h2 className="text-2xl font-bold text-gray-900">Mortgage Details</h2>
+
+      <div className="space-y-4">
+        <div>
+          <Slider
+            label="Loan Balance"
+            value={inputs.loanBalance}
+            min={10000}
+            max={2000000}
+            step={10000}
+            formatValue={formatCurrency}
+            onChange={(e) => handleChange('loanBalance', Number(e.target.value))}
+          />
+          <Input
+            type="number"
+            value={inputs.loanBalance}
+            min={10000}
+            max={2000000}
+            step={10000}
+            onChange={(e) => handleChange('loanBalance', Number(e.target.value))}
+            className="mt-2"
+            placeholder="Enter amount"
+          />
+        </div>
+
+        <div>
+          <Slider
+            label="Interest Rate"
+            value={inputs.interestRate}
+            min={0}
+            max={20}
+            step={0.1}
+            formatValue={(v) => formatPercentage(v, 2)}
+            onChange={(e) => handleChange('interestRate', Number(e.target.value))}
+          />
+          <Input
+            type="number"
+            value={inputs.interestRate}
+            min={0}
+            max={20}
+            step={0.1}
+            onChange={(e) => handleChange('interestRate', Number(e.target.value))}
+            className="mt-2"
+            placeholder="Enter percentage"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Slider
+              label="Years Remaining"
+              value={inputs.yearsRemaining}
+              min={0}
+              max={50}
+              step={1}
+              formatValue={(v) => `${v} years`}
+              onChange={(e) => handleChange('yearsRemaining', Number(e.target.value))}
+            />
+            <Input
+              type="number"
+              value={inputs.yearsRemaining}
+              min={0}
+              max={50}
+              step={1}
+              onChange={(e) => handleChange('yearsRemaining', Number(e.target.value))}
+              className="mt-2"
+              placeholder="Enter years"
+            />
+          </div>
+          <div>
+            <Slider
+              label="Months Remaining"
+              value={inputs.monthsRemaining}
+              min={0}
+              max={11}
+              step={1}
+              formatValue={(v) => `${v} months`}
+              onChange={(e) => handleChange('monthsRemaining', Number(e.target.value))}
+            />
+            <Input
+              type="number"
+              value={inputs.monthsRemaining}
+              min={0}
+              max={11}
+              step={1}
+              onChange={(e) => {
+                const months = Number(e.target.value)
+                // Ensure months stay within 0-11 range
+                const validMonths = Math.max(0, Math.min(11, months))
+                handleChange('monthsRemaining', validMonths)
+              }}
+              className="mt-2"
+              placeholder="Enter months"
+            />
+          </div>
+        </div>
+
+        <div>
+          <Slider
+            label="Regular Monthly Payment"
+            value={inputs.regularPayment}
+            min={100}
+            max={10000}
+            step={100}
+            formatValue={formatCurrency}
+            onChange={(e) => handleChange('regularPayment', Number(e.target.value))}
+          />
+          <Input
+            type="number"
+            value={inputs.regularPayment}
+            min={100}
+            max={10000}
+            step={100}
+            onChange={(e) => handleChange('regularPayment', Number(e.target.value))}
+            className="mt-2"
+            placeholder="Enter amount"
+          />
+        </div>
+      </div>
+
+      <div className="border-t pt-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Extra Payment Options</h3>
+
         <div className="space-y-4">
           <div>
             <Slider
-              label="Money to Allocate"
+              label="Extra Payment Amount"
               value={inputs.extraPayment}
               min={0}
-              max={100000}
-              step={1000}
+              max={5000}
+              step={100}
               formatValue={formatCurrency}
               onChange={(e) => handleChange('extraPayment', Number(e.target.value))}
             />
@@ -46,8 +166,8 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
               type="number"
               value={inputs.extraPayment}
               min={0}
-              max={100000}
-              step={1000}
+              max={5000}
+              step={100}
               onChange={(e) => handleChange('extraPayment', Number(e.target.value))}
               className="mt-2"
               placeholder="Enter amount"
@@ -55,7 +175,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Allocation Frequency
+              Payment Frequency
             </label>
             <select
               value={inputs.extraPaymentFrequency}
@@ -70,19 +190,19 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             </select>
             <p className="mt-1 text-sm text-gray-500">
               {inputs.extraPaymentFrequency === 'monthly' &&
-                'Allocation applied every month'}
+                'Extra payment applied every month'}
               {inputs.extraPaymentFrequency === 'annual' &&
-                'Allocation applied once per year (at end of year)'}
+                'Extra payment applied once per year (at end of year)'}
               {inputs.extraPaymentFrequency === 'one-time' &&
-                'Allocation applied only in the first month'}
+                'Extra payment applied only in the first month'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* 2. Invest Section */}
       <div className="border-t pt-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Invest</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Investment Assumptions</h3>
+
         <div className="space-y-4">
           <div>
             <Slider
@@ -127,137 +247,9 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
               </select>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* 3. Nest (Mortgage) Section */}
-      <div className="border-t pt-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Nest (Mortgage)</h3>
-        <div className="space-y-4">
-          <div>
-            <Slider
-              label="Loan Balance"
-              value={inputs.loanBalance}
-              min={10000}
-              max={2000000}
-              step={10000}
-              formatValue={formatCurrency}
-              onChange={(e) => handleChange('loanBalance', Number(e.target.value))}
-            />
-            <Input
-              type="number"
-              value={inputs.loanBalance}
-              min={10000}
-              max={2000000}
-              step={10000}
-              onChange={(e) => handleChange('loanBalance', Number(e.target.value))}
-              className="mt-2"
-              placeholder="Enter amount"
-            />
-          </div>
-
-          <div>
-            <Slider
-              label="Interest Rate"
-              value={inputs.interestRate}
-              min={0}
-              max={20}
-              step={0.1}
-              formatValue={(v) => formatPercentage(v, 2)}
-              onChange={(e) => handleChange('interestRate', Number(e.target.value))}
-            />
-            <Input
-              type="number"
-              value={inputs.interestRate}
-              min={0}
-              max={20}
-              step={0.1}
-              onChange={(e) => handleChange('interestRate', Number(e.target.value))}
-              className="mt-2"
-              placeholder="Enter percentage"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Slider
-                label="Years Remaining"
-                value={inputs.yearsRemaining}
-                min={0}
-                max={50}
-                step={1}
-                formatValue={(v) => `${v} years`}
-                onChange={(e) => handleChange('yearsRemaining', Number(e.target.value))}
-              />
-              <Input
-                type="number"
-                value={inputs.yearsRemaining}
-                min={0}
-                max={50}
-                step={1}
-                onChange={(e) => handleChange('yearsRemaining', Number(e.target.value))}
-                className="mt-2"
-                placeholder="Enter years"
-              />
-            </div>
-            <div>
-              <Slider
-                label="Months Remaining"
-                value={inputs.monthsRemaining}
-                min={0}
-                max={11}
-                step={1}
-                formatValue={(v) => `${v} months`}
-                onChange={(e) => handleChange('monthsRemaining', Number(e.target.value))}
-              />
-              <Input
-                type="number"
-                value={inputs.monthsRemaining}
-                min={0}
-                max={11}
-                step={1}
-                onChange={(e) => {
-                  const months = Number(e.target.value)
-                  // Ensure months stay within 0-11 range
-                  const validMonths = Math.max(0, Math.min(11, months))
-                  handleChange('monthsRemaining', validMonths)
-                }}
-                className="mt-2"
-                placeholder="Enter months"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Slider
-              label="Regular Monthly Payment"
-              value={inputs.regularPayment}
-              min={100}
-              max={10000}
-              step={100}
-              formatValue={formatCurrency}
-              onChange={(e) => handleChange('regularPayment', Number(e.target.value))}
-            />
-            <Input
-              type="number"
-              value={inputs.regularPayment}
-              min={100}
-              max={10000}
-              step={100}
-              onChange={(e) => handleChange('regularPayment', Number(e.target.value))}
-              className="mt-2"
-              placeholder="Enter amount"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Optionals */}
-      <div className="border-t pt-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Optionals</h3>
-        <div className="space-y-4">
           {/* Optional: Home Value & Appreciation */}
-          <div>
+          <div className="border-t pt-4 mt-4">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -327,8 +319,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             )}
           </div>
 
-          {/* Optional: Inflation Adjustment */}
-          <div>
+          <div className="border-t pt-4 mt-4">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -42,7 +42,7 @@ Users want:
 
 | Feature | Description | Acceptance Criteria |
 |----------|-------------|---------------------|
-| **Input panel** | Loan balance (CAD), current home value (CAD), interest % (annual), years + months remaining, regular payment (monthly CAD), optional extra payment (CAD) with frequency selector (monthly/annual/one-time), expected investment return % (annual) with preset dropdown (Conservative 3%, Balanced 5%, Aggressive 7%), expected home appreciation % (optional toggle), inflation toggle, inflation rate (%). All inputs with Canadian currency formatting ($CAD). All sliders start at minimum values on page load. | • All input fields functional with validation<br>• Current home value input (CAD) - base value for home appreciation calculations<br>• Years (0-50) + months (0-11) for remaining mortgage term<br>• Extra payment frequency: monthly, annual (once per year), or one-time (first month only)<br>• **Investment return presets**: Dropdown with Conservative (3%), Typical balanced portfolio (5%), Aggressive (7%)<br>• **Home value & appreciation**: Optional toggle to enable/disable home value calculations<br>• **Home appreciation slider**: Optional 0-10% annual appreciation rate (default 0%, only active when toggle enabled)<br>• **Inflation toggle**: Show results in real (inflation-adjusted) terms<br>• **Inflation rate input**: Default 2%, editable 0-5%<br>• Currency displays in CAD format ($1,234.56)<br>• Sliders + numeric inputs for all fields (no redundant labels on inputs)<br>• All sliders initialize at minimum values on page load<br>• Real-time validation (e.g., rates 0-20%, months 0-11, inflation 0-5%, appreciation 0-10%)<br>• Inputs persist in localStorage (optional)<br>• **No comparison horizon field** - chart uses mortgage remaining timeline |
+| **Input panel** | **Section Organization**: Money to Allocate (first), Invest, Nest (Mortgage), Optionals. Money to Allocate: amount (CAD, max $100k) with frequency selector (monthly/annual/one-time). Invest: expected investment return % (annual) with preset dropdown (Conservative 3%, Typical balanced portfolio 5%, Aggressive 7%). Nest (Mortgage): loan balance (CAD), interest % (annual), years + months remaining, regular payment (monthly CAD). Optionals: current home value (CAD) with appreciation toggle, expected home appreciation % (optional toggle), inflation toggle, inflation rate (%). All inputs with Canadian currency formatting ($CAD). All sliders start at minimum values on page load. | • **Input panel organized in 4 sections**: Money to Allocate → Invest → Nest (Mortgage) → Optionals<br>• **Money to Allocate section (first)**: Amount slider (0-$100k, step $1k) with frequency selector (monthly/annual/one-time)<br>• **Invest section**: Expected annual return with preset dropdown (Conservative 3%, Typical balanced portfolio 5%, Aggressive 7%)<br>• **Nest (Mortgage) section**: Loan balance, interest rate, years (0-50) + months (0-11) remaining, regular monthly payment<br>• **Optionals section**: Home value & appreciation toggle, inflation adjustment toggle<br>• Current home value input (CAD) - base value for home appreciation calculations<br>• **Home value & appreciation**: Optional toggle to enable/disable home value calculations<br>• **Home appreciation slider**: Optional 0-10% annual appreciation rate (default 0%, only active when toggle enabled)<br>• **Inflation toggle**: Show results in real (inflation-adjusted) terms<br>• **Inflation rate input**: Default 2%, editable 0-5%<br>• Currency displays in CAD format ($1,234.56)<br>• Sliders + numeric inputs for all fields (no redundant labels on inputs)<br>• All sliders initialize at minimum values on page load<br>• Real-time validation (e.g., rates 0-20%, months 0-11, inflation 0-5%, appreciation 0-10%)<br>• Inputs persist in localStorage (optional)<br>• **No comparison horizon field** - chart uses mortgage remaining timeline |
 | **Computation engine** | Local TypeScript functions computing Canadian mortgage amortization (semi-annual compounding), investment growth, net worth under both strategies. Supports years + months remaining, extra payment frequencies (monthly/annual/one-time), optional home appreciation, and optional inflation adjustment. All calculations client-side, no API calls. | • Accurate mortgage calculations matching Canadian bank standards<br>• Handles years + months for remaining mortgage term<br>• Supports monthly, annual, and one-time extra payments<br>• Investment growth with compound interest (supports all payment frequencies)<br>• **Home appreciation**: Optional annual appreciation rate (0-10%, default 0%)<br>• **Home value formula**: Home value = Current home value × (1 + appreciation_rate)^(years)<br>• **Inflation adjustment**: Optional conversion of nominal values to real (inflation-adjusted) terms<br>• **Inflation formula**: Real value = Nominal value / (1 + inflation_rate)^(months/12)<br>• Net worth = (home equity + investment balance) where home equity = (appreciated home value - mortgage balance)<br>• Calculations complete in < 100ms<br>• Handles edge cases (zero payments, zero returns) |
 | **Results summary** | Key metrics displayed in summary cards: total wealth under each strategy, net difference (CAD), mortgage-free date for each strategy. Optional sensitivity analysis table showing how break-even shifts with input variations. | • 3 summary cards visible above chart (Winner, Net Worth Difference, Prepay Mortgage-Free Date)<br>• Clear winner indication (Invest vs Prepay)<br>• All values formatted in CAD currency<br>• Mortgage-free dates shown for both strategies<br>• **Sensitivity Analysis**: Button to show/hide table with investment return variations (±1%, ±2%)<br>• Sensitivity table shows break-even return, net worth difference, and winner for each scenario<br>• **Calculation Details**: Toggle to show/hide calculation methodology and formulas (transparency feature) |
 | **Charts** | Interactive line chart showing net-worth trajectories over time for both strategies (Invest vs Prepay). Chart maps to the mortgage remaining timeline (years + months). Chart updates in real-time as inputs change. Supports inflation-adjusted display. | • Line chart with 2 series (Invest strategy, Prepay strategy)<br>• X-axis: time based on mortgage remaining timeline (years), Y-axis: net worth (CAD) with "(Real Terms)" label when inflation-adjusted<br>• Chart timeline matches mortgage remaining term (years + months)<br>• Chart title shows "(Inflation-Adjusted)" when real terms toggle is enabled<br>• Chart library loads and renders correctly<br>• Responsive sizing (mobile/desktop)<br>• Tooltips showing exact values on hover with month numbers<br>• Visual indicator banner when real terms are enabled |
@@ -140,7 +140,7 @@ Where:
 | **Form Handling** | React controlled components | Input validation with TypeScript |
 | **Backend** | None (static app) | Fully static export via `next export` |
 | **Hosting** | Vercel | CDN + SSL, automatic deployments from main branch |
-| **Analytics** | Plausible Analytics | Privacy-friendly, GDPR/PIPEDA compliant |
+| **Analytics** | Vercel Analytics | Privacy-friendly, GDPR/PIPEDA compliant, automatic visitor and page view tracking |
 | **Version Control** | GitHub | MIT license, public or private repo |
 | **Package Manager** | npm or pnpm | Lock file committed |
 | **Linting/Formatting** | ESLint + Prettier | TypeScript strict mode enabled |
@@ -369,7 +369,7 @@ interface MonthlyData {
 ### 7.9 Security & Privacy
 
 **Data Handling:**
-- No external API calls except analytics (Plausible)
+- No external API calls except analytics (Vercel Analytics)
 - All calculations performed client-side
 - No data sent to servers
 - No cookies except analytics (if required)
@@ -441,10 +441,13 @@ npm run lint         # Run ESLint
 
 ## 9. 📈 Analytics & Metrics (v0.0)
 
-- Page views, unique users, device type.  
-- Clicks on “Calculate” and “Reset.”  
-- Average session duration.  
-*(No user identifiers stored.)*
+**Vercel Analytics Integration:**
+- Automatic visitor and page view tracking
+- Page views, unique users, device type
+- Navigation patterns and user flow
+- Privacy-friendly: anonymous data collection, no personal identifiers stored
+- Analytics component integrated in root layout (`app/layout.tsx`)
+- Data visible in Vercel dashboard after deployment
 
 ## 10. 💵 Monetization Placeholder
 
