@@ -89,3 +89,5 @@ With these improvements, you should see:
 
 Overall expected SEO score: **90-95/100** (pending OG image)
 
+
+

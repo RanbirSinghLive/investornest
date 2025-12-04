@@ -71,3 +71,5 @@ After creating the image:
 3. Test on [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/)
 4. Test on [Twitter Card Validator](https://cards-dev.twitter.com/validator)
 
+
+
